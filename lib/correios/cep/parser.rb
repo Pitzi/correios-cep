@@ -1,5 +1,4 @@
 # frozen_string_literal: true
-require 'ox'
 
 module Correios
   module CEP
@@ -15,14 +14,14 @@ module Correios
       }.freeze
 
       def address(xml)
-        doc = Ox.parse(xml)
+        doc = Correios::CEP::XmlLoader.parse(xml)
 
-        return_node = find_node(doc.nodes, 'return')
+        return_node = doc.find_node('return')
         return {} if return_node.nil?
 
         address = {}
-        return_node.nodes.each do |element|
-          address[ADDRESS_MAP[element.name]] = text_for(element) if ADDRESS_MAP[element.name]
+        doc.children_for(return_node).each do |element|
+          address[ADDRESS_MAP[element.name]] = doc.text_for(element).force_encoding(Encoding::UTF_8) if ADDRESS_MAP[element.name]
         end
 
         join_complements(address)
@@ -30,18 +29,6 @@ module Correios
       end
 
       private
-
-      def find_node(nodes, name)
-        node = nodes.last
-        return nil unless node.is_a?(Ox::Element)
-        return node if node.nil? || node.name == name
-
-        find_node(node.nodes, name)
-      end
-
-      def text_for(element)
-        element.text.to_s.force_encoding(Encoding::UTF_8)
-      end
 
       def join_complements(address)
         address[:complement] = "" if address[:complement].nil?

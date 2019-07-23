@@ -21,7 +21,14 @@ Gem::Specification.new do |spec|
   spec.platform = Gem::Platform::RUBY
   spec.required_ruby_version = Gem::Requirement.new('>= 2.2.0')
 
-  spec.add_dependency 'ox', '~> 2.9'
+  if RUBY_PLATFORM =~ /java/
+    spec.platform = 'java'
+    spec.add_dependency 'nokogiri', '~> 1.6.2'
+  else
+    spec.platform = Gem::Platform::RUBY
+    spec.add_dependency 'ox', '~> 2.9'
+  end
+    
   spec.add_dependency 'http', '~> 4.0.0'
 
   spec.add_development_dependency 'coveralls', '~> 0.8.21'
